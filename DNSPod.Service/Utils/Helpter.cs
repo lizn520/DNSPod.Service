@@ -30,13 +30,17 @@ namespace DNSPod.Service
     {
         public static string GetPublicIP()
         {
-            string url = new Regex(@"<iframe\s*src=""(.+?)""").Match(GetHtml("http://ip138.com/")).Groups[1].Value;
-            return new Regex(@"\[(.+?)\]").Match(GetHtml(url)).Groups[1].Value;
+            return GetHtml("https://4.ipw.cn/");
         }
 
-        public static dynamic RecordList(string token, string domain, string sub_domain)
+        public static string GetPublicIPV6()
         {
-            return Post(Dnsapi.List, $"{CommonParam(token)}&domain={domain}&sub_domain={sub_domain}");
+            return GetHtml("https://6.ipw.cn/");
+        }
+
+        public static dynamic RecordList(string token, string domain, string sub_domain, string record_type = "A")
+        {
+            return Post(Dnsapi.List, $"{CommonParam(token)}&domain={domain}&sub_domain={sub_domain}&record_type={record_type}");
         }
 
         public static dynamic RecordCreate(string token, string domain, string sub_domain, string value, string record_type = "A", string record_line_id = "0")

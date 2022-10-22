@@ -32,6 +32,7 @@ namespace DNSPod.Service
                     while (true)
                     {
                         ReferData();
+                        ReferDataV6();
                         Thread.Sleep(Time);
                     }
                 }).Start();
@@ -54,10 +55,13 @@ namespace DNSPod.Service
                 string _ip = Helpter.GetPublicIP();
                 foreach (Record item in listRecord)
                 {
+                    if (item.update_v4 != "yes")
+                        return;
+
                     item.ip = _ip;
                     if (item.ip == item._ip)
                     {
-                        Helpter.WriteLineLog(logPath, LogCategory.Api, $"上次轮训ip[{item._ip}]与本次获取ip:[{item.ip}]一致");
+                        Helpter.WriteLineLog(logPath, LogCategory.Api, $"上次轮训ip:[{item._ip}]与本次获取ip:[{item.ip}]一致");
                         return;
                     }
                     var json = Helpter.RecordList(login.login_token, item.domain, item.subdomain);
@@ -84,6 +88,54 @@ namespace DNSPod.Service
                     if (recordId > 0)
                         json = Helpter.RecordDdns(login.login_token, recordId, item.domain, item.subdomain, item.ip);
                     Helpter.WriteLineLog(logPath, LogCategory.Api, $"[{item.subdomain}.{item.domain}] 记录值 [{item.ip}] 更新成功");
+                }
+            }
+            catch (Exception ex)
+            {
+                Helpter.WriteLineLog(logPath, LogCategory.Api, ex.Message);
+            }
+        }
+
+        void ReferDataV6()
+        {
+            try
+            {
+                string _ipv6 = Helpter.GetPublicIPV6();
+                foreach (Record item in listRecord)
+                {
+                    if (item.update_v6 != "yes")
+                        return;
+
+                    item.ipv6 = _ipv6;
+                    if (item.ipv6 == item._ipv6)
+                    {
+                        Helpter.WriteLineLog(logPath, LogCategory.Api, $"上次轮训IPv6:[{item._ipv6}]与本次获取IPv6:[{item.ipv6}]一致");
+                        return;
+                    }
+                    var json = Helpter.RecordList(login.login_token, item.domain, item.subdomain, record_type:"AAAA");
+                    if (json.status.code != 1)//操作失败，立刻结束操作
+                    {
+                        Helpter.WriteLineLog(logPath, LogCategory.Api, "登陆认证失败,轮询已停止");
+                        this.Stop();
+                        return;
+                        //Thread.CurrentThread.Abort();
+                    }
+                    item._ipv6 = item.ipv6;
+                    int recordId = 0;
+                    if (json.records != null && json.records.Count > 0)
+                    {
+                        if (json.records[0].value == item.ipv6)//与记录中的ip一致，不需要操作
+                        {
+                            Helpter.WriteLineLog(logPath, LogCategory.Api, $"[{item.subdomain}.{item.domain}] IPv6 记录值 [{item.ipv6}] 与服务器记录一致不需要修改");
+                            continue;
+                        }
+                        recordId = json.records[0].id;
+                    }
+                    else
+                        recordId = Helpter.RecordCreate(login.login_token, item.domain, item.subdomain, item.ipv6, record_type: "AAAA");
+                    if (recordId > 0)
+                        json = Helpter.RecordDdns(login.login_token, recordId, item.domain, item.subdomain, item.ipv6);
+                    Helpter.WriteLineLog(logPath, LogCategory.Api, $"[{item.subdomain}.{item.domain}] IPv6 记录值 [{item.ipv6}] 更新成功");
                 }
             }
             catch (Exception ex)
@@ -132,6 +184,8 @@ namespace DNSPod.Service
                     {
                         subdomain = item.Attributes["sub_domain"].Value,
                         domain = item.Attributes["domain"].Value,
+                        update_v4= item.Attributes["update_ipv4"].Value,
+                        update_v6 = item.Attributes["update_ipv6"].Value,
                     });
                 }
             }

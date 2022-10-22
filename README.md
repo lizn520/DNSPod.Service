@@ -4,7 +4,7 @@
 - 找遍了各个地方，发现基于dnspod的ddns软件都只能运行在linux的shell脚本，于是自己动手写了这个
 - 使用DNSPod官方API接口
   - 会检测登陆id与token能否登陆成功，登陆验证失败时，服务不能正常启动
-  - 会检测从ip138获取的ip与dnspod已设置的记录值是否一致，防止重复设置相同记录被禁用api
+  - 会检测从ipw.cn获取的ip与dnspod已设置的记录值是否一致，防止重复设置相同记录被禁用api
 - 基于.NET Framework 4.5
   - .NET 4.5下载地址： [在线安装包](http://go.microsoft.com/fwlink/?LinkId=225704) [离线安装包](http://go.microsoft.com/fwlink/?LinkId=225702)
 
@@ -31,9 +31,11 @@
 
   - sub_domain，主机记录
   - domain，域名
+  - update_ipv4，使能IPv4
+  - update_ipv6，使能IPv6
 
   ~~~xml
-  <Record sub_domain="www" domain="domain.com"/>
+  <Record sub_domain="www" domain="domain.com" update_ipv4="yes" update_ipv6="no"/>
   ~~~
 
   
