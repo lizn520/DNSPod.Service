@@ -1,0 +1,4 @@
+DNSPod.Service/bin/*
+.vs/*
+DNSPod.Service/obj/*
+packages/*

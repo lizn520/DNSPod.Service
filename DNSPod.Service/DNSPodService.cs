@@ -73,7 +73,7 @@ namespace DNSPod.Service
                         //Thread.CurrentThread.Abort();
                     }
                     item._ip = item.ip;
-                    int recordId = 0;
+                    long recordId = 0;
                     if (json.records != null && json.records.Count > 0)
                     {
                         if (json.records[0].value == item.ip)//与记录中的ip一致，不需要操作
@@ -81,7 +81,7 @@ namespace DNSPod.Service
                             Helpter.WriteLineLog(logPath, LogCategory.Api, $"[{item.subdomain}.{item.domain}] 记录值 [{item.ip}] 与服务器记录一致不需要修改");
                             continue;
                         }
-                        recordId = json.records[0].id;
+                        recordId = (long)json.records[0].id;
                     }
                     else
                         recordId = Helpter.RecordCreate(login.login_token, item.domain, item.subdomain, item.ip);
@@ -121,7 +121,7 @@ namespace DNSPod.Service
                         //Thread.CurrentThread.Abort();
                     }
                     item._ipv6 = item.ipv6;
-                    int recordId = 0;
+                    long recordId = 0;
                     if (json.records != null && json.records.Count > 0)
                     {
                         if (json.records[0].value == item.ipv6)//与记录中的ip一致，不需要操作
@@ -129,7 +129,7 @@ namespace DNSPod.Service
                             Helpter.WriteLineLog(logPath, LogCategory.Api, $"[{item.subdomain}.{item.domain}] IPv6 记录值 [{item.ipv6}] 与服务器记录一致不需要修改");
                             continue;
                         }
-                        recordId = json.records[0].id;
+                        recordId = (long)json.records[0].id;
                     }
                     else
                         recordId = Helpter.RecordCreate(login.login_token, item.domain, item.subdomain, item.ipv6, record_type: "AAAA");

@@ -30,12 +30,24 @@ namespace DNSPod.Service
     {
         public static string GetPublicIP()
         {
-            return GetHtml("https://4.ipw.cn/");
+            string ip = GetHtml("https://4.ipw.cn/");
+            if (string.IsNullOrEmpty(ip))
+            {
+                // 备用服务
+                ip = GetHtml("https://ipv4.icanhazip.com/");
+            }
+            return ip?.Trim() ?? string.Empty;
         }
 
         public static string GetPublicIPV6()
         {
-            return GetHtml("https://6.ipw.cn/");
+            string ip = GetHtml("https://6.ipw.cn/");
+            if (string.IsNullOrEmpty(ip))
+            {
+                // 备用服务
+                ip = GetHtml("https://ipv6.icanhazip.com/");
+            }
+            return ip?.Trim() ?? string.Empty;
         }
 
         public static dynamic RecordList(string token, string domain, string sub_domain, string record_type = "A")
@@ -46,16 +58,16 @@ namespace DNSPod.Service
         public static dynamic RecordCreate(string token, string domain, string sub_domain, string value, string record_type = "A", string record_line_id = "0")
         {
             dynamic result = Post(Dnsapi.Create, $"{CommonParam(token)}&domain={domain}&sub_domain={sub_domain}&value={value}&record_type={record_type}&record_line_id={record_line_id}");
-            return Convert.ToInt32(result.status.code) == 1 ? Convert.ToInt32(result.record.id) : -1;
+            return Convert.ToInt32(result.status.code) == 1 ? Convert.ToInt64(result.record.id) : -1;
         }
 
-        public static dynamic RecordDdns(string token, int record_id, string domain, string sub_domain, string value, string record_line = "默认")
+        public static dynamic RecordDdns(string token, long record_id, string domain, string sub_domain, string value, string record_line = "默认")
         {
             return Post(Dnsapi.Ddns,
                 $"{CommonParam(token)}&record_id={record_id}&domain={domain}&sub_domain={sub_domain}&value={value}&record_line={record_line}");
         }
 
-        public static dynamic RecordModify(string token, int record_id, string domain, string sub_domain, string value, int ttl = 100, string record_line = "默认", string record_type = "A", string record_line_id = "0")
+        public static dynamic RecordModify(string token, long record_id, string domain, string sub_domain, string value, int ttl = 100, string record_line = "默认", string record_type = "A", string record_line_id = "0")
         {
             return Post(Dnsapi.Modify,
                 $"{CommonParam(token)}&record_id={record_id}&domain={domain}&sub_domain={sub_domain}&value={value}&record_line={record_line}&record_type={record_type}&record_line_id={record_line_id}");
